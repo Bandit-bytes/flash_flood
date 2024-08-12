@@ -1,0 +1,9 @@
+[22:31:13] [main/INFO] (FabricLoader/GameProvider) Loading Minecraft 1.21 with Fabric Loader 0.16.0
+[22:31:14] [main/INFO] (FabricLoader) Loading 4 mods:
+	- fabricloader 0.16.0
+	- java 21
+	- minecraft 1.21
+	- mixinextras 0.4.0
+[22:31:14] [main/INFO] (FabricLoader/Mixin) SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/C:/Users/noide/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.0+mixin.0.8.7/2ce1c5d57a061f3e259ec30b8b0cb2dc889c5156/sponge-mixin-0.15.0+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[22:31:14] [main/INFO] (FabricLoader/Mixin) Loaded Fabric development mappings for mixin remapper!
+[22:31:15] [Datafixer Bootstrap/INFO] (Minecraft) 226 Datafixer optimizations took 187 milliseconds
