@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "flash_flood",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "name": "Flash Flood",
   "description": "Flood when it rains!",
   "authors": [
