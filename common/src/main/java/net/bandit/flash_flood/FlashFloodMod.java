@@ -2,19 +2,16 @@ package net.bandit.flash_flood;
 
 import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 public final class FlashFloodMod {
     public static final String MOD_ID = "flash_flood";
     private static final Random RANDOM = new Random();
-    private static final Set<BlockPos> waterBlocks = new HashSet<>();
 
     private static SimpleConfig config;
 
@@ -31,7 +28,7 @@ public final class FlashFloodMod {
     }
 
     private static void handlePlayerTick(ServerPlayer player) {
-        Level world = player.level();
+        ServerLevel world = player.serverLevel(); // Get the ServerLevel from the player
         BlockPos playerPos = player.blockPosition();
 
         double waterCreationChance = config.waterCreationChance;
@@ -47,28 +44,17 @@ public final class FlashFloodMod {
                 );
 
                 if (world.getBlockState(waterPos).isAir() && world.getBlockState(waterPos.below()).isSolidRender(world, waterPos.below()) && !hasTileEntity(world, waterPos)) {
-                    world.setBlockAndUpdate(waterPos, Blocks.WATER.defaultBlockState());
-                    waterBlocks.add(waterPos); // Track the water block position
+                    WaterBlockTracker.getInstance().addWaterBlock(world, waterPos); // Use the tracker to add water blocks
                 }
             }
-        } else if (!world.isRaining() && !waterBlocks.isEmpty() && config.removeWaterAfterRain) {
-            // Remove the tracked water blocks when the rain stops if the option is enabled
-            removeWaterBlocks(world);
+        } else if (!world.isRaining() && config.removeWaterAfterRain) {
+            WaterBlockTracker.getInstance().removeAllWaterBlocks(world); // Remove water blocks when rain stops
         }
     }
 
     private static boolean hasTileEntity(Level world, BlockPos pos) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         return blockEntity != null;
-    }
-
-    private static void removeWaterBlocks(Level world) {
-        for (BlockPos waterPos : waterBlocks) {
-            if (world.getBlockState(waterPos).getBlock() == Blocks.WATER) {
-                world.setBlockAndUpdate(waterPos, Blocks.AIR.defaultBlockState());
-            }
-        }
-        waterBlocks.clear(); // Clear the set after removal
     }
 
     public static void initClient() {
