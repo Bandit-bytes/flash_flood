@@ -1,0 +1,5 @@
+{
+  "waterCreationChance": 0.2,
+  "waterCreationRadius": 32,
+  "removeWaterAfterRain": true
+}

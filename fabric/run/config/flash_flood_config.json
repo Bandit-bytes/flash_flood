@@ -1,0 +1,8 @@
+{
+  "waterCreationChance": 0.2,
+  "waterCreationRadius": 32,
+  "removeWaterAfterRain": true,
+  "waterSpreadChance": 0.5,
+  "maxWaterSpreadRadius": 3,
+  "maxWaterHeight": 3
+}
