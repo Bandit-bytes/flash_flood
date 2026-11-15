@@ -45,7 +45,10 @@ public class SimpleConfig {
     /** Allow oceans to overflow. Rivers, lakes and ponds always can. */
     public boolean floodOceans = true;
 
-    /** Let flood water replace grass, ferns and small flowers (restored when the water drains). */
+    /**
+     * Let flood water cover grass, ferns, flowers, tall grass and sugar cane instead of leaving dry spots
+     * around them. They are all put back when the water drains.
+     */
     public boolean replacePlants = true;
 
     /** Show an action-bar message to players when a flood starts and ends. */

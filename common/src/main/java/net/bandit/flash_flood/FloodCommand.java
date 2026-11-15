@@ -60,7 +60,7 @@ public final class FloodCommand {
         FloodData data = FloodData.get(level);
         String state = data.isFloodActive()
                 ? "active, water up to +" + FloodManager.currentRise(data) + " blocks"
-                : (data.isEmpty() ? "none" : "draining");
+                : (data.hasWork() ? "draining" : "none");
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "Flood: " + state + ". Flood water blocks: " + data.size()), false);
         return 1;

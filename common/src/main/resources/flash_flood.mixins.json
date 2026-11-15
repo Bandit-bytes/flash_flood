@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "net.bandit.flash_flood.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "client": [],
+  "mixins": [
+    "WaterFluidMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

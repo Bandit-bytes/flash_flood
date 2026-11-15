@@ -45,9 +45,19 @@ public final class FloodData extends SavedData {
     private int floodTicks;
     /** Rain state last tick, used to detect the moment rain starts. */
     private boolean wasRaining;
+    /**
+     * The world's waterSourceConversion game rule from before floods paused it, or null if not paused.
+     * Only used on the Overworld's data (game rules are server-wide).
+     */
+    private Boolean savedSourceConversion;
 
     /** Insertion-ordered so draining can remove the most recently flooded (outermost) blocks first. */
     private final LinkedHashMap<BlockPos, Entry> entries = new LinkedHashMap<>();
+
+    /** Plants destroyed by flowing water during a flood, restored once the flood has drained. */
+    private final LinkedHashMap<BlockPos, BlockState> washed = new LinkedHashMap<>();
+    /** Restoration passes over washed plants that are still covered by water; gives up after a few. */
+    private int washedPasses;
 
     // Runtime-only drain bookkeeping (not saved; rebuilt from entries when needed).
     private ArrayDeque<BlockPos> drainQueue;
@@ -97,6 +107,15 @@ public final class FloodData extends SavedData {
         }
     }
 
+    public Boolean getSavedSourceConversion() {
+        return savedSourceConversion;
+    }
+
+    public void setSavedSourceConversion(Boolean value) {
+        savedSourceConversion = value;
+        setDirty();
+    }
+
     // --- tracked water -------------------------------------------------------------------------
 
     public Entry getEntry(BlockPos pos) {
@@ -109,6 +128,58 @@ public final class FloodData extends SavedData {
 
     public boolean isEmpty() {
         return entries.isEmpty();
+    }
+
+    /** True while there is flood water to drain or washed-away plants to restore. */
+    public boolean hasWork() {
+        return !entries.isEmpty() || !washed.isEmpty();
+    }
+
+    // --- washed-away plants ----------------------------------------------------------------------
+
+    public boolean isWashed(BlockPos pos) {
+        return washed.containsKey(pos);
+    }
+
+    public int washedCount() {
+        return washed.size();
+    }
+
+    public void recordWashed(BlockPos pos, BlockState plant) {
+        if (washed.putIfAbsent(pos.immutable(), plant) == null) {
+            washedPasses = 0;
+            setDirty();
+        }
+    }
+
+    public BlockState getWashed(BlockPos pos) {
+        return washed.get(pos);
+    }
+
+    /** Removes and returns the plant washed away at this spot, if any. */
+    public BlockState takeWashed(BlockPos pos) {
+        BlockState plant = washed.remove(pos);
+        if (plant != null) {
+            setDirty();
+        }
+        return plant;
+    }
+
+    /** Snapshot of washed plants, for iteration while restoring. */
+    public List<Map.Entry<BlockPos, BlockState>> washedSnapshot() {
+        return new ArrayList<>(washed.entrySet());
+    }
+
+    public void clearWashed() {
+        if (!washed.isEmpty()) {
+            washed.clear();
+            setDirty();
+        }
+        washedPasses = 0;
+    }
+
+    public int nextWashedPass() {
+        return ++washedPasses;
     }
 
     public void add(BlockPos pos, BlockState original, int baseY) {
@@ -158,6 +229,9 @@ public final class FloodData extends SavedData {
         tag.putBoolean("FloodActive", floodActive);
         tag.putInt("FloodTicks", floodTicks);
         tag.putBoolean("WasRaining", wasRaining);
+        if (savedSourceConversion != null) {
+            tag.putBoolean("SavedSourceConversion", savedSourceConversion);
+        }
 
         // Store replaced block states as a palette; nearly every entry is plain air.
         Map<BlockState, Integer> paletteIndex = new HashMap<>();
@@ -181,6 +255,23 @@ public final class FloodData extends SavedData {
             i++;
         }
 
+        long[] washedPositions = new long[washed.size()];
+        int[] washedStates = new int[washed.size()];
+        int w = 0;
+        for (Map.Entry<BlockPos, BlockState> e : washed.entrySet()) {
+            Integer index = paletteIndex.get(e.getValue());
+            if (index == null) {
+                index = palette.size();
+                paletteIndex.put(e.getValue(), index);
+                palette.add(NbtUtils.writeBlockState(e.getValue()));
+            }
+            washedPositions[w] = e.getKey().asLong();
+            washedStates[w] = index;
+            w++;
+        }
+        tag.putLongArray("WashedPositions", washedPositions);
+        tag.putIntArray("WashedStates", washedStates);
+
         tag.put("Palette", palette);
         tag.putLongArray("Positions", positions);
         tag.putIntArray("States", states);
@@ -193,6 +284,9 @@ public final class FloodData extends SavedData {
         data.floodActive = tag.getBoolean("FloodActive");
         data.floodTicks = tag.getInt("FloodTicks");
         data.wasRaining = tag.getBoolean("WasRaining");
+        if (tag.contains("SavedSourceConversion")) {
+            data.savedSourceConversion = tag.getBoolean("SavedSourceConversion");
+        }
 
         HolderGetter<Block> blocks = registries.lookupOrThrow(Registries.BLOCK);
         ListTag paletteTag = tag.getList("Palette", Tag.TAG_COMPOUND);
@@ -211,6 +305,15 @@ public final class FloodData extends SavedData {
                 continue;
             }
             data.entries.put(BlockPos.of(positions[i]), new Entry(palette.get(index), bases[i]));
+        }
+
+        long[] washedPositions = tag.getLongArray("WashedPositions");
+        int[] washedStates = tag.getIntArray("WashedStates");
+        for (int i = 0; i < Math.min(washedPositions.length, washedStates.length); i++) {
+            int index = washedStates[i];
+            if (index >= 0 && index < palette.size()) {
+                data.washed.put(BlockPos.of(washedPositions[i]), palette.get(index));
+            }
         }
         return data;
     }
