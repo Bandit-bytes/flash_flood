@@ -17,3 +17,8 @@ run/
 
 # OS
 .DS_Store
+
+# Trailer recording
+run-trailer/
+trailer/build/
+trailer/out/

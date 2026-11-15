@@ -7,6 +7,20 @@ architectury {
     fabric()
 }
 
+loom {
+    runs {
+        // Dev-only: records the mod trailer. Use trailer/record-trailer.sh rather than running this directly.
+        trailer {
+            client()
+            configName = 'Trailer Client'
+            ideConfigGenerated = false
+            vmArg '-Dflash_flood.trailer=true'
+            programArgs '--width', '1280', '--height', '720'
+            runDir 'run-trailer'
+        }
+    }
+}
+
 configurations {
     common {
         canBeResolved = true
@@ -48,6 +62,9 @@ processResources {
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
+    // The trailer director is a dev tool; keep it out of release jars.
+    exclude 'net/bandit/flash_flood/client/trailer/**'
+    exclude 'assets/flash_flood/textures/trailer/**'
 }
 
 remapJar {

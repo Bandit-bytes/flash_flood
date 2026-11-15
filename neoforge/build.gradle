@@ -52,6 +52,9 @@ processResources {
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
+    // The trailer director is a dev tool; keep it out of release jars.
+    exclude 'net/bandit/flash_flood/client/trailer/**'
+    exclude 'assets/flash_flood/textures/trailer/**'
 }
 
 remapJar {
