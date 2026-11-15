@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+out/
+classes/
+
+# Run directories
+run/
+
+# IDE
+.idea/workspace.xml
+.idea/caches/
+.idea/libraries/
+*.iws
+*.iml
+.vscode/
+
+# OS
+.DS_Store
