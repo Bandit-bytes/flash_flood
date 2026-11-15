@@ -9,9 +9,9 @@ version = "${version}"
 displayName = "Flash Flood"
 authors = "Bandit-Bytes"
 description = '''
-Floods when it rains!!
+Heavy rain can turn into a flood: rivers, lakes and oceans overflow their banks, then drain away when the storm passes.
 '''
-#logoFile = ""
+logoFile = "flash_flood_icon.png"
 
 [[dependencies.flash_flood]]
 modId = "neoforge"

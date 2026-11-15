@@ -3,7 +3,7 @@
   "id": "flash_flood",
   "version": "${version}",
   "name": "Flash Flood",
-  "description": "Floods when it rains!",
+  "description": "Heavy rain can turn into a flood: rivers, lakes and oceans overflow their banks, then drain away when the storm passes.",
   "authors": [
     "Bandit-Bytes"
   ],
@@ -12,6 +12,7 @@
     "issues": "https://github.com/Bandit-bytes/flash_flood/issues"
   },
   "license": "MIT",
+  "icon": "flash_flood_icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
